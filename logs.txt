@@ -1,0 +1,7 @@
+gobyexample.com 10
+github.com 30
+golang.org 12
+golang.org 8
+gobyexample.com 15
+github.com 30
+binables.org 50

@@ -4,32 +4,57 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"regexp"
+	"sort"
+	"strconv"
 	"strings"
 )
 
 func main() {
-	args := os.Args[1:]
+	var (
+		stats   map[string]int
+		domains []string
+		total   int
+		lines   int
+	)
+
 	in := bufio.NewScanner(os.Stdin)
-	in.Split(bufio.ScanWords)
+	stats = make(map[string]int)
 
-	query := args[0]
-	rx := regexp.MustCompile(`[^a-z]+`)
-
-	words := make(map[string]bool)
 	for in.Scan() {
-		word := strings.ToLower(in.Text())
-		word = rx.ReplaceAllString(word, "")
+		lines++
 
-		if len(word) > 2 {
-			words[word] = true
+		fields := strings.Fields(in.Text())
+		if len(fields) < 2 {
+			fmt.Printf("Wrong Input: %v (line #%d)\n", fields, lines)
+			return
 		}
+
+		domain := fields[0]
+		visits, err := strconv.Atoi(fields[1])
+
+		if visits < 0 || err != nil {
+			fmt.Printf("Wrong Input: %v (line #%d)\n", fields[1], lines)
+			return
+		}
+
+		total += visits
+		if _, ok := stats[domain]; !ok {
+			domains = append(domains, domain)
+		}
+		stats[domain] += visits
 	}
 
-	if words[query] {
-		fmt.Printf("The input contains %q.\n", query)
-		return
-	}
+	fmt.Printf("%-30s %10s\n", "DOMAIN", "VISITS")
+	fmt.Println(strings.Repeat("-", 45))
 
-	fmt.Printf("The input %q does not exist\n", query)
+	sort.Strings(domains)
+	for _, domain := range domains {
+		visits := stats[domain]
+		fmt.Printf("%-30s %10d\n", domain, visits)
+	}
+	fmt.Printf("\n%-30s %10d\n", "TOTAL", total)
+
+	if err := in.Err(); err != nil {
+		fmt.Printf("Error: %v\n", err)
+	}
 }
