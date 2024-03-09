@@ -5,43 +5,21 @@ import (
 	"fmt"
 	"os"
 	"sort"
-	"strconv"
 	"strings"
 )
 
-type result struct {
-	domain string
-	visits int
-}
-type parser struct {
-	stats   map[string]result // Total visits per domain
-	domains []string          // Unique domains
-	total   int               // Total visits for all domains
-	lines   int               // Number of parse lines
-}
-
 func main() {
 	in := bufio.NewScanner(os.Stdin)
-	p := parser{
-		stats: make(map[string]result),
-	}
+	p := newParser()
 
 	for in.Scan() {
 		p.lines++
-
-		fields := strings.Fields(in.Text())
-		if len(fields) < 2 {
-			fmt.Printf("Wrong Input: %v (line #%d)\n", fields, p.lines)
+		parse, err := parse(p, in.Text())
+		if err != nil {
+			fmt.Println(err)
 			return
 		}
-
-		domain := fields[0]
-		visits, err := strconv.Atoi(fields[1])
-
-		if visits < 0 || err != nil {
-			fmt.Printf("Wrong Input: %v (line #%d)\n", fields[1], p.lines)
-			return
-		}
+		domain, visits := parse.domain, parse.visits
 
 		p.total += visits
 		if _, ok := p.stats[domain]; !ok {
