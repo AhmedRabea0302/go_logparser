@@ -14,21 +14,12 @@ func main() {
 
 	for in.Scan() {
 		p.lines++
-		parse, err := parse(p, in.Text())
+		parsed, err := parse(p, in.Text())
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
-		domain, visits := parse.domain, parse.visits
-
-		p.total += visits
-		if _, ok := p.stats[domain]; !ok {
-			p.domains = append(p.domains, domain)
-		}
-		p.stats[domain] = result{
-			domain: domain,
-			visits: visits + p.stats[domain].visits,
-		}
+		p = update(p, parsed)
 	}
 
 	fmt.Printf("%-30s %10s\n", "DOMAIN", "VISITS")
